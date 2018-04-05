@@ -24,10 +24,29 @@ Resources:
     Properties:
       BucketName: !Ref BucketName
       AccessControl: PublicRead
+      CorsConfiguration:
+        CorsRules:
+        - AllowedHeaders: ['*']
+          AllowedMethods: [GET, PUT, POST, HEAD]
+          AllowedOrigins: ['*']
+          Id: CORSRule
+          MaxAge: '3600'
       WebsiteConfiguration:
         ErrorDocument: "index.html"
         IndexDocument: "index.html"
 
+  FrontEndS3BucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref FrontEndS3Bucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "s3:GetObject"
+            Effect: "Allow"
+            Resource:
+              - !Sub arn:aws:s3:::${FrontEndS3Bucket}/*
+            Principal: "*"
   VPC:
     Type: 'AWS::EC2::VPC'
     Properties:
