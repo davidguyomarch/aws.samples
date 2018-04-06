@@ -253,6 +253,10 @@ Outputs:
     Value: !Ref MyCognitoIdentityPool
     Description: Id of the Cognito Identity Pool
 
+  CognitoIdentityPoolClientId:
+    Value: !Ref MyCognitoUserPoolClient
+    Description: Id of the Cognito User Pool Client
+
   CognitoUserPoolClientSecret:
     Value: !GetAtt MyCognitoUserPoolClient.ClientSecret
     Description: Secret of the Client App
