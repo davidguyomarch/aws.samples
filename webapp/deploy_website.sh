@@ -84,6 +84,12 @@ ClientId=$(aws cloudformation describe-stacks \
     --output text \
     --profile $PROFILE)
 
+HomePageURL=$(aws cloudformation describe-stacks \
+    --stack-name $STACK_NAME \
+    --query 'Stacks[0].Outputs[?OutputKey==`HomePageURL`].OutputValue' \
+    --output text \
+    --profile $PROFILE)
+
 cat > ./src/aws-exports.js <<EOF
 
 const aws_exports = {
@@ -107,3 +113,5 @@ EOF
 
 npm run build
 aws s3 sync ./dist/ s3://$BUCKET_NAME --profile $PROFILE
+
+echo Your website is now available on $HomePageURL
