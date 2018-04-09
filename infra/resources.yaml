@@ -16,6 +16,20 @@ Parameters:
     Description: Name of the S3 Bucket to store the marketplace frontend
     Type: String
     Default: oab-bpce-marketplace-frontend-bucket
+  ReadCapacityUnits:
+    Description: Provisioned read throughput
+    Type: Number
+    Default: '5'
+    MinValue: '5'
+    MaxValue: '10000'
+    ConstraintDescription: must be between 5 and 10000
+  WriteCapacityUnits:
+    Description: Provisioned write throughput
+    Type: Number
+    Default: '10'
+    MinValue: '5'
+    MaxValue: '10000'
+    ConstraintDescription: must be between 5 and 10000
 
 Resources:
   # S3 Bucket to store the static page of the web site.
@@ -131,6 +145,44 @@ Resources:
   #       TargetArns:
   #          - !Ref NetLoadBalancer
 
+################################################################################
+# DynamoDb Table                                                               #
+################################################################################
+  myDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "notes"
+      AttributeDefinitions:
+      - AttributeName: 'userId'
+        AttributeType: S
+      - AttributeName: 'noteId'
+        AttributeType: S
+      KeySchema:
+      - AttributeName: 'userId'
+        KeyType: HASH
+      - AttributeName: 'noteId'
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref 'ReadCapacityUnits'
+        WriteCapacityUnits: !Ref 'WriteCapacityUnits'
+
+  PutFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.put
+      Runtime: nodejs6.10
+      CodeUri: s3://bucket/api_backend.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Events:
+        PutResource:
+          Type: Api
+          Properties:
+            Path: /resource/{resourceId}
+            Method: put
+ 
 ################################################################################
 # Cognito User Pool Config                                                     #
 ################################################################################
