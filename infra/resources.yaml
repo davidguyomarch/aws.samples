@@ -145,44 +145,7 @@ Resources:
   #       TargetArns:
   #          - !Ref NetLoadBalancer
 
-################################################################################
-# DynamoDb Table                                                               #
-################################################################################
-  myDynamoDBTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: "notes"
-      AttributeDefinitions:
-      - AttributeName: 'userId'
-        AttributeType: S
-      - AttributeName: 'noteId'
-        AttributeType: S
-      KeySchema:
-      - AttributeName: 'userId'
-        KeyType: HASH
-      - AttributeName: 'noteId'
-        KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref 'ReadCapacityUnits'
-        WriteCapacityUnits: !Ref 'WriteCapacityUnits'
 
-  PutFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: index.put
-      Runtime: nodejs6.10
-      CodeUri: s3://bucket/api_backend.zip
-      Policies: AmazonDynamoDBFullAccess
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref Table
-      Events:
-        PutResource:
-          Type: Api
-          Properties:
-            Path: /resource/{resourceId}
-            Method: put
- 
 ################################################################################
 # Cognito User Pool Config                                                     #
 ################################################################################
