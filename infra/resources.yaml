@@ -145,7 +145,6 @@ Resources:
   #       TargetArns:
   #          - !Ref NetLoadBalancer
 
-
 ################################################################################
 # Cognito User Pool Config                                                     #
 ################################################################################
@@ -248,6 +247,24 @@ Resources:
         authenticated: !GetAtt MyCognitoAuthorizedRole.Arn
         unauthenticated: !GetAtt MyCognitoUnAuthorizedRole.Arn
 
+  myDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: 'notes'
+      AttributeDefinitions:
+      - AttributeName: 'userId'
+        AttributeType: S
+      - AttributeName: 'noteId'
+        AttributeType: S
+      KeySchema:
+      - AttributeName: 'userId'
+        KeyType: HASH
+      - AttributeName: 'noteId'
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref 'ReadCapacityUnits'
+        WriteCapacityUnits: !Ref 'WriteCapacityUnits'
+
 Outputs:
   # MainAPIEndPoint:
   #   Value: !Sub 'http://${NetLoadBalancer.DNSName}'
@@ -275,3 +292,7 @@ Outputs:
   CognitoUserPoolClientSecret:
     Value: !GetAtt MyCognitoUserPoolClient.ClientSecret
     Description: Secret of the Client App
+
+  DynamoDBTableArn:
+    Value: !GetAtt myDynamoDBTable.Arn
+    Description: Arn of the myDynamoDBTable.
