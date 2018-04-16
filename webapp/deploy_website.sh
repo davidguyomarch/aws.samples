@@ -2,7 +2,8 @@
 
 PROFILE="default"
 BUCKET_NAME="vo-oab-bpce-marketplace-frontend-bucket"
-STACK_NAME="ServerlessDemo"
+INFRA_STACK_NAME="ServerlessDemo"
+SERVERLESS_STACK_NAME=" hello-app-api-prod"
 
 usage()
 {
@@ -47,7 +48,7 @@ case $key in
       shift # past value
       ;;
     -n | --stackname)
-      STACK_NAME="$2"
+      INFRA_STACK_NAME="$2"
       shift # past argument
       shift # past value
       ;;
@@ -64,29 +65,35 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 
 
 UserPoolId=$(aws cloudformation describe-stacks \
-    --stack-name $STACK_NAME \
+    --stack-name $INFRA_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoUserPoolName`].OutputValue' \
     --output text \
     --profile $PROFILE)
 UserPoolArn=$(aws cloudformation describe-stacks \
-    --stack-name $STACK_NAME \
+    --stack-name $INFRA_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoUserPoolArn`].OutputValue' \
     --output text \
     --profile $PROFILE)
 IdentityPoolId=$(aws cloudformation describe-stacks \
-    --stack-name $STACK_NAME \
+    --stack-name $INFRA_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoIdentityPoolId`].OutputValue' \
     --output text \
     --profile $PROFILE)
 ClientId=$(aws cloudformation describe-stacks \
-    --stack-name $STACK_NAME \
+    --stack-name $INFRA_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoIdentityPoolClientId`].OutputValue' \
     --output text \
     --profile $PROFILE)
 
 HomePageURL=$(aws cloudformation describe-stacks \
-    --stack-name $STACK_NAME \
+    --stack-name $INFRA_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`HomePageURL`].OutputValue' \
+    --output text \
+    --profile $PROFILE)
+
+ServiceEndpoint=$(aws cloudformation describe-stacks \
+    --stack-name $SERVERLESS_STACK_NAME \
+    --query 'Stacks[0].Outputs[?OutputKey==`ServiceEndpoint`].OutputValue' \
     --output text \
     --profile $PROFILE)
 
@@ -104,7 +111,15 @@ const aws_exports = {
         userPoolWebClientId: '$ClientId',
     // OPTIONAL - Enforce user authentication prior to accessing AWS resources or not
         mandatorySignIn: false,
-    }
+    },
+    API: {
+      endpoints: [
+          {
+              name: "my-api",
+              endpoint: "$ServiceEndpoint"
+          }
+      ]
+  }
 };
 
 export default aws_exports

@@ -16,6 +16,7 @@
     <h1 :style="theme.h1">
       Hicham Vue Sample
     </h1>
+    <button v-on:click="getGreetings">Test it</button>
 
     <div :style="theme.section">
       <h2 :style="theme.h2">Sample Title</h2>
@@ -25,6 +26,8 @@
 
 <script>
 import { AmplifyTheme } from '../amplify'
+import { API } from 'aws-amplify'
+
 
 export default {
   name: 'Home',
@@ -32,6 +35,41 @@ export default {
     return {
       theme: AmplifyTheme
     }
-  }
+  },
+  methods: {
+      signOut: function(event) {
+          Auth.signOut()
+              .then(data => {
+                  logger.debug('sign out success', data);
+                  AmplifyStore.commit('setUser', null);
+                  this.$router.push('/auth/signIn');
+              })
+              .catch(err => logger.error('sign out error', err))
+      },
+
+      getGreetings: function () {
+        let apiName = 'my-api';
+        let path = '/hello?hello=david';
+        let myInit = { // OPTIONAL
+            headers: {}, // OPTIONAL // hello=david
+            response: true // OPTIONAL (return entire response object instead of response.data)
+        }
+        API.get(apiName, path, myInit).then(response => {
+            alert(response.data.hello);
+        });
+      },
+
+      getCount: function () {
+        let apiName = 'my-api';
+        let path = '/notes/count';
+        let myInit = { // OPTIONAL
+            headers: {}, // OPTIONAL // hello=david
+            response: true // OPTIONAL (return entire response object instead of response.data)
+        }
+        API.get(apiName, path, myInit).then(response => {
+            alert('You have ' + response.data.count + 'notes.');
+        });
+      }
+    }
 }
 </script>
