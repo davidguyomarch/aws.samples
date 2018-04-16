@@ -55,7 +55,7 @@ export default {
             response: true // OPTIONAL (return entire response object instead of response.data)
         }
         API.get(apiName, path, myInit).then(response => {
-            alert(response.data.hello);
+            alert('The lambda function sent a response : ' + response.data.hello);
         });
       },
 
