@@ -1,0 +1,6 @@
+{
+  "queryStringParameters": {
+    "hello": "test"
+  },
+  "body": null
+}

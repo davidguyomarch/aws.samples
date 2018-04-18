@@ -1,0 +1,8 @@
+{
+  "queryStringParameters": {
+    "userId": "David"
+  },
+  "body": {
+    "content": "hello world"
+  }
+}

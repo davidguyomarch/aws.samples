@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: >-
+  AWS CloudFormation Template of the Serverless Demo App.
+  Produce lambda and db services.
+
+Parameters:
+  ReadCapacityUnits:
+    Description: Provisioned read throughput
+    Type: Number
+    Default: '5'
+    MinValue: '5'
+    MaxValue: '10000'
+    ConstraintDescription: must be between 5 and 10000
+  WriteCapacityUnits:
+    Description: Provisioned write throughput
+    Type: Number
+    Default: '10'
+    MinValue: '5'
+    MaxValue: '10000'
+    ConstraintDescription: must be between 5 and 10000
+
+Resources:
+################################################################################
+# DynamoDb Table                                                               #
+################################################################################
+  myDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: 'notes'
+      AttributeDefinitions:
+      - AttributeName: 'userId'
+        AttributeType: S
+      - AttributeName: 'noteId'
+        AttributeType: S
+      KeySchema:
+      - AttributeName: 'userId'
+        KeyType: HASH
+      - AttributeName: 'noteId'
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref 'ReadCapacityUnits'
+        WriteCapacityUnits: !Ref 'WriteCapacityUnits'
+
+  # TestFunctionRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #       - Effect: Allow
+  #         Principal:
+  #           Service:
+  #           - lambda.amazonaws.com
+  #         Action:
+  #         - sts:AssumeRole
+  #     Path: "/"
+  #     Policies:
+  #     - PolicyName: TestFunctionPolicy
+  #       PolicyDocument:
+  #         Version: '2012-10-17'
+  #         Statement:
+  #         - Effect: Allow
+  #           Action:
+  #             - dynamodb:DescribeTable
+  #             - dynamodb:Query
+  #             - dynamodb:Scan
+  #             - dynamodb:GetItem
+  #             - dynamodb:PutItem
+  #             - dynamodb:UpdateItem
+  #             - dynamodb:DeleteItem
+  #           Resource: !GetAtt myDynamoDBTable.Arn
+  #
+
+  HelloApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      DefinitionBody:
+        swagger: 2.0
+        info:
+          title:
+            Ref: AWS::StackName
+        paths:
+          "/get":
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TestFunction.Arn}/invocations
+              responses: {}
+
+  TestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-TestFunction"
+      Handler: index.handler
+      Runtime: nodejs8.10
+      # Role: TestFunctionRole
+      Environment:
+        Variables:
+          HELLO_NAME: hicham
+      Events:
+        GetHtml:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: GET
+            RestApiId:
+                Ref: HelloApi
+
+Outputs:
+  DynamoDBTableArn:
+    Value: !GetAtt myDynamoDBTable.Arn
+    Description: Arn of the myDynamoDBTable.
+  ApiURL:
+    Description: "API endpoint URL for Prod environment"
+    Value: !Sub "https://${HelloApi}.execute-api.${AWS::Region}.amazonaws.com/prod/get"
