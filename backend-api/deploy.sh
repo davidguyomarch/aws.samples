@@ -17,7 +17,7 @@
 
 PROFILE="default"
 # BUCKET_NAME="vo-oab-bpce-marketplace-frontend-bucket"
-STACK_NAME="ServerlessDemo"
+# STACK_NAME="ServerlessDemo"
 
 usage()
 {
@@ -31,8 +31,6 @@ USAGE: usage [OPTIONS] [TEXT]
    -p | --profile        Define the aws profile of your .aws/config file you want to use.
                          default: default
 
-   -n | --stackname      Define the name of the stack
-                         default: ServerlessDemo
 EOF
   return
 }
@@ -53,11 +51,6 @@ case $key in
       shift # past argument
       shift # past value
       ;;
-    -n | --stackname)
-      STACK_NAME="$2"
-      shift # past argument
-      shift # past value
-      ;;
     *)    # unknown option
       POSITIONAL+=("$1") # save it in an array for later
       shift # past argument
@@ -69,19 +62,10 @@ esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-
-DynamoDBTableArn=$(aws cloudformation describe-stacks \
-    --stack-name $STACK_NAME \
-    --query 'Stacks[0].Outputs[?OutputKey==`DynamoDBTableArn`].OutputValue' \
-    --output text \
-    --profile $PROFILE)
-
-serverless deploy --NoteDynamodbTableArn $DynamoDBTableArn
-
-# arn:aws:execute-api:eu-central-1:392033229120:alvij63fw1/*/GET/hello
 # DynamoDBTableArn=$(aws cloudformation describe-stacks \
-#     --stack-name  hello-app-api-prod \
+#     --stack-name $STACK_NAME \
 #     --query 'Stacks[0].Outputs[?OutputKey==`DynamoDBTableArn`].OutputValue' \
 #     --output text \
 #     --profile $PROFILE)
-#
+
+serverless deploy

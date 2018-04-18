@@ -1,20 +1,19 @@
 service: hello-app-api
 
 # Inputs
+#   AppName
 #   NoteDynamodbTableArn: the Arn of the dynamodb table
+#   ReadCapacityUnits
+#   WriteCapacityUnits
 
+custom:
+  # AppName: ${opt:AppName, 'hello-app-api'}
+  # ReadCapacityUnits: ${opt:ReadCapacityUnits, 5}
+  # WriteCapacityUnits: ${opt:WriteCapacityUnits, 10}
+  AppName: 'HelloApi'
+  ReadCapacityUnits: 5
+  WriteCapacityUnits: 10
 
-
-
-
-# # Use serverless-webpack plugin to transpile ES6/ES7
-# plugins:
-#   - serverless-webpack
-#
-# # Enable auto-packing of external modules
-# custom:
-#   webpackIncludeModules: true
-#
 provider:
   name: aws
   runtime: nodejs8.10
@@ -34,8 +33,10 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       # Resource: "arn:aws:dynamodb:${self:provider.region}:*:*"
-      Resource: "${opt:NoteDynamodbTableArn}"
-
+      # Resource:
+        # 'Fn::GetAtt': [myDynamoDBTable, Arn]
+      Resource:
+        - "arn:aws:apigateway:*::"
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
   # - path: url path is /notes
@@ -69,7 +70,7 @@ functions:
               querystrings:
                 userId: true
           cors: true
-          # authorizer: aws_iam
+          authorizer: aws_iam
   create:
     handler: index.create
     events:
@@ -81,7 +82,7 @@ functions:
           #     querystrings:
           #       userId: true
           cors: true
-          # authorizer: aws_iam
+          authorizer: aws_iam
   count:
     handler: index.count
     events:
@@ -92,35 +93,6 @@ functions:
           authorizer: aws_iam
 resources:
   Resources:
-    # S3 Bucket to store the static page of the web site.
-    FrontEndS3Bucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${opt:BucketName}
-        AccessControl: PublicRead
-        CorsConfiguration:
-          CorsRules:
-          - AllowedHeaders: ['*']
-            AllowedMethods: [GET, PUT, POST, HEAD]
-            AllowedOrigins: ['*']
-            Id: CORSRule
-            MaxAge: '3600'
-        WebsiteConfiguration:
-          ErrorDocument: "index.html"
-          IndexDocument: "index.html"
-
-    FrontEndS3BucketPolicy:
-      Type: "AWS::S3::BucketPolicy"
-      Properties:
-        Bucket: !Ref FrontEndS3Bucket
-        PolicyDocument:
-          Statement:
-            - Action:
-                - "s3:GetObject"
-              Effect: "Allow"
-              Resource:
-                - !Sub arn:aws:s3:::${opt:FrontEndS3Bucket}/*
-              Principal: "*"
 
   ################################################################################
   # Cognito User Pool Config                                                     #
@@ -128,7 +100,7 @@ resources:
     MyCognitoUserPool:
       Type: AWS::Cognito::UserPool
       Properties:
-        UserPoolName: !Sub ${opt:AppName}UserPool
+        UserPoolName: ${self:custom.AppName}UserPool
         Schema:
           - Name: email
             AttributeDataType: String
@@ -149,20 +121,23 @@ resources:
     MyCognitoUserPoolClient:
       Type: AWS::Cognito::UserPoolClient
       Properties:
-        ClientName: !Sub ${opt:AppName}Client
+        ClientName: ${self:custom.AppName}Client
         ExplicitAuthFlows:
           -  ADMIN_NO_SRP_AUTH
         GenerateSecret: false
-        UserPoolId: !Ref 'MyCognitoUserPool'
+        UserPoolId:
+          Ref: 'MyCognitoUserPool'
 
     MyCognitoIdentityPool:
       Type: AWS::Cognito::IdentityPool
       Properties:
-        IdentityPoolName: !Sub ${opt:AppName}IdentityPool
+        IdentityPoolName: ${self:custom.AppName}IdentityPool
         AllowUnauthenticatedIdentities: false
         CognitoIdentityProviders:
-          - ClientId: !Ref MyCognitoUserPoolClient
-            ProviderName: !GetAtt MyCognitoUserPool.ProviderName
+          - ClientId:
+              Ref: MyCognitoUserPoolClient
+            ProviderName:
+              'Fn::GetAtt': [MyCognitoUserPool, ProviderName]
 
     MyCognitoAuthorizedRole:
       Type: "AWS::IAM::Role"
@@ -177,7 +152,8 @@ resources:
                 - "sts:AssumeRoleWithWebIdentity"
               Condition:
                 StringEquals:
-                  "cognito-identity.amazonaws.com:aud": !Ref MyCognitoIdentityPool
+                  "cognito-identity.amazonaws.com:aud":
+                    Ref: MyCognitoIdentityPool
                 "ForAnyValue:StringLike":
                   "cognito-identity.amazonaws.com:amr": authenticated
         Policies:
@@ -196,7 +172,13 @@ resources:
                   Action:
                     - "execute-api:Invoke"
                   Resource:
-                    - !Sub arn:aws:executeapi:${AWS::Region}:*:c1jk9z77u9/*
+                    # - arn:aws:execute-api:${self:provider.region}:account-id:api-id/stage/METHOD_HTTP_VERB/Resource-path
+                    # - arn:aws:execute-api:${self:provider.region}:*:uwb7mddira/${self:provider.stage}/GET/hello
+                    - Fn::Join:
+                      - ""
+                      - - "arn:aws:execute-api:${self:provider.region}:"
+                        - Ref: "AWS::AccountId"
+                        - ":uwb7mddira/${self:provider.stage}/GET/hello"
 
     MyCognitoUnAuthorizedRole:
       Type: "AWS::IAM::Role"
@@ -211,7 +193,8 @@ resources:
                 - "sts:AssumeRoleWithWebIdentity"
               Condition:
                 StringEquals:
-                  "cognito-identity.amazonaws.com:aud": !Ref MyCognitoIdentityPool
+                  "cognito-identity.amazonaws.com:aud":
+                    Ref: MyCognitoIdentityPool
                 "ForAnyValue:StringLike":
                   "cognito-identity.amazonaws.com:amr": unauthenticated
 
@@ -219,10 +202,13 @@ resources:
     MyCognitoIdentityPoolRoleMapping:
       Type: "AWS::Cognito::IdentityPoolRoleAttachment"
       Properties:
-        IdentityPoolId: !Ref MyCognitoIdentityPool
+        IdentityPoolId:
+          Ref: MyCognitoIdentityPool
         Roles:
-          authenticated: !GetAtt MyCognitoAuthorizedRole.Arn
-          unauthenticated: !GetAtt MyCognitoUnAuthorizedRole.Arn
+          authenticated:
+            'Fn::GetAtt': [MyCognitoAuthorizedRole, Arn]
+          unauthenticated:
+            'Fn::GetAtt': [MyCognitoUnAuthorizedRole, Arn]
 
     myDynamoDBTable:
       Type: AWS::DynamoDB::Table
@@ -239,37 +225,36 @@ resources:
         - AttributeName: 'noteId'
           KeyType: RANGE
         ProvisionedThroughput:
-          ReadCapacityUnits: ${opt:ReadCapacityUnits}
-          WriteCapacityUnits: ${opt:WriteCapacityUnits}
+          ReadCapacityUnits: ${self:custom.ReadCapacityUnits}
+          WriteCapacityUnits: ${self:custom.WriteCapacityUnits}
 
   Outputs:
-    # MainAPIEndPoint:
-    #   Value: !Sub 'http://${NetLoadBalancer.DNSName}'
-    #   Description: Newly created application URL (won't work from the outside of your AWS VPC) -- TO BE CONFIRMED! --
-    HomePageURL:
-      Value: !GetAtt FrontEndS3Bucket.WebsiteURL
-      Description: Main page of the web app.
-
     CognitoUserPoolName:
-      Value: !Ref 'MyCognitoUserPool'
+      Value:
+        Ref: 'MyCognitoUserPool'
       Description: logical ID of the Cognito User Pool
 
     CognitoUserPoolArn:
-      Value: !GetAtt MyCognitoUserPool.Arn
+      Value:
+        'Fn::GetAtt': [ MyCognitoUserPool, Arn ]
       Description: Arn of the Cognito User Pool
 
     CognitoIdentityPoolId:
-      Value: !Ref MyCognitoIdentityPool
+      Value:
+        Ref: MyCognitoIdentityPool
       Description: Id of the Cognito Identity Pool
 
     CognitoIdentityPoolClientId:
-      Value: !Ref MyCognitoUserPoolClient
+      Value:
+        Ref: MyCognitoUserPoolClient
       Description: Id of the Cognito User Pool Client
 
     CognitoUserPoolClientSecret:
-      Value: !GetAtt MyCognitoUserPoolClient.ClientSecret
+      Value:
+        'Fn::GetAtt': [ MyCognitoUserPoolClient, ClientSecret ]
       Description: Secret of the Client App
 
     DynamoDBTableArn:
-      Value: !GetAtt myDynamoDBTable.Arn
+      Value:
+        'Fn::GetAtt': [ myDynamoDBTable, Arn ]
       Description: Arn of the myDynamoDBTable.

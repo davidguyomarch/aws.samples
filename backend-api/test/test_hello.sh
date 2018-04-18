@@ -1,9 +1,7 @@
 #!/bin/bash
 
 PROFILE="default"
-BUCKET_NAME="vo-oab-bpce-marketplace-frontend-bucket"
-INFRA_STACK_NAME="ServerlessDemo"
-SERVERLESS_STACK_NAME=" hello-app-api-prod"
+SERVERLESS_STACK_NAME="hello-app-api-prod"
 
 usage()
 {
@@ -16,9 +14,6 @@ USAGE: usage [OPTIONS] [TEXT]
 
    -p | --profile        Define the aws profile of your .aws/config file you want to use.
                          default: default
-
-   -s | --s3BucketName   Define the name of your s3bucket
-                         default: oab-bpce-marketplace-frontend-bucket
 
    -n | --stackname      Define the name of the stack
                          default: ServerlessDemo
@@ -42,13 +37,8 @@ case $key in
       shift # past argument
       shift # past value
       ;;
-    -s | --s3BucketName)
-      BUCKET_NAME="$2"
-      shift # past argument
-      shift # past value
-      ;;
     -n | --stackname)
-      INFRA_STACK_NAME="$2"
+      SERVERLESS_STACK_NAME="$2"
       shift # past argument
       shift # past value
       ;;
@@ -65,28 +55,28 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 
 
 UserPoolId=$(aws cloudformation describe-stacks \
-    --stack-name $INFRA_STACK_NAME \
+    --stack-name $SERVERLESS_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoUserPoolName`].OutputValue' \
     --output text \
     --profile $PROFILE)
 UserPoolArn=$(aws cloudformation describe-stacks \
-    --stack-name $INFRA_STACK_NAME \
+    --stack-name $SERVERLESS_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoUserPoolArn`].OutputValue' \
     --output text \
     --profile $PROFILE)
 IdentityPoolId=$(aws cloudformation describe-stacks \
-    --stack-name $INFRA_STACK_NAME \
+    --stack-name $SERVERLESS_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoIdentityPoolId`].OutputValue' \
     --output text \
     --profile $PROFILE)
 ClientId=$(aws cloudformation describe-stacks \
-    --stack-name $INFRA_STACK_NAME \
+    --stack-name $SERVERLESS_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoIdentityPoolClientId`].OutputValue' \
     --output text \
     --profile $PROFILE)
 
 HomePageURL=$(aws cloudformation describe-stacks \
-    --stack-name $INFRA_STACK_NAME \
+    --stack-name $SERVERLESS_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`HomePageURL`].OutputValue' \
     --output text \
     --profile $PROFILE)
