@@ -2,8 +2,8 @@
 
 PROFILE="default"
 BUCKET_NAME="vo-oab-bpce-marketplace-frontend-bucket"
-INFRA_STACK_NAME="ServerlessDemo"
-SERVERLESS_STACK_NAME=" hello-app-api-prod"
+# INFRA_STACK_NAME="hello-client-prod"
+SERVERLESS_STACK_NAME="hello-app-api-prod"
 
 usage()
 {
@@ -20,8 +20,8 @@ USAGE: usage [OPTIONS] [TEXT]
    -s | --s3BucketName   Define the name of your s3bucket
                          default: oab-bpce-marketplace-frontend-bucket
 
-   -n | --stackname      Define the name of the stack
-                         default: ServerlessDemo
+   -n | --stackname      Define the name of the serverless stack
+                         default: hello-app-api-prod
 EOF
   return
 }
@@ -48,7 +48,7 @@ case $key in
       shift # past value
       ;;
     -n | --stackname)
-      INFRA_STACK_NAME="$2"
+      SERVERLESS_STACK_NAME="$2"
       shift # past argument
       shift # past value
       ;;
@@ -65,28 +65,28 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 
 
 UserPoolId=$(aws cloudformation describe-stacks \
-    --stack-name $INFRA_STACK_NAME \
+    --stack-name $SERVERLESS_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoUserPoolName`].OutputValue' \
     --output text \
     --profile $PROFILE)
 UserPoolArn=$(aws cloudformation describe-stacks \
-    --stack-name $INFRA_STACK_NAME \
+    --stack-name $SERVERLESS_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoUserPoolArn`].OutputValue' \
     --output text \
     --profile $PROFILE)
 IdentityPoolId=$(aws cloudformation describe-stacks \
-    --stack-name $INFRA_STACK_NAME \
+    --stack-name $SERVERLESS_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoIdentityPoolId`].OutputValue' \
     --output text \
     --profile $PROFILE)
 ClientId=$(aws cloudformation describe-stacks \
-    --stack-name $INFRA_STACK_NAME \
+    --stack-name $SERVERLESS_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CognitoIdentityPoolClientId`].OutputValue' \
     --output text \
     --profile $PROFILE)
 
 HomePageURL=$(aws cloudformation describe-stacks \
-    --stack-name $INFRA_STACK_NAME \
+    --stack-name $SERVERLESS_STACK_NAME \
     --query 'Stacks[0].Outputs[?OutputKey==`HomePageURL`].OutputValue' \
     --output text \
     --profile $PROFILE)
@@ -97,6 +97,8 @@ ServiceEndpoint=$(aws cloudformation describe-stacks \
     --output text \
     --profile $PROFILE)
 
+Region=$(aws configure get region --profile $PROFILE)
+
 cat > ./src/aws-exports.js <<EOF
 
 const aws_exports = {
@@ -104,13 +106,13 @@ const aws_exports = {
     // REQUIRED - Amazon Cognito Identity Pool ID
         identityPoolId: '$IdentityPoolId',
     // REQUIRED - Amazon Cognito Region
-        region: 'eu-central-1',
+        region: '$Region',
     // OPTIONAL - Amazon Cognito User Pool ID
         userPoolId: '$UserPoolId',
     // OPTIONAL - Amazon Cognito Web Client ID (26-char alphanumeric string)
         userPoolWebClientId: '$ClientId',
     // OPTIONAL - Enforce user authentication prior to accessing AWS resources or not
-        mandatorySignIn: false,
+        mandatorySignIn: true,
     },
     API: {
       endpoints: [

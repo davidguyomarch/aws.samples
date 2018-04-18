@@ -3,7 +3,7 @@
 
 PROFILE="default"
 BUCKET_NAME="vo-oab-bpce-marketplace-frontend-bucket"
-STACK_NAME="ServerlessDemo"
+STACK_NAME="hello-client-prod"
 
 usage()
 {
@@ -70,5 +70,4 @@ aws cloudformation update-stack \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameters \
       ParameterKey=BucketName,ParameterValue=$BUCKET_NAME \
-      ParameterKey=AppName,ParameterValue=$STACK_NAME \
   --profile $PROFILE

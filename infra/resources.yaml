@@ -3,33 +3,10 @@ Description: >-
   AWS CloudFormation Template of the BPCE Marketplace framework
 
 Parameters:
-#   InstanceType:
-#     Description: WebServer EC2 instance type
-#     Type: String
-#     Default: t2.micro
-#     ConstraintDescription: must be a valid EC2 instance type.
-  AppName:
-    Description: Name of your App (Will be used to declare your App in Cognito)
-    Type: String
-    Default: MyApp
   BucketName:
     Description: Name of the S3 Bucket to store the marketplace frontend
     Type: String
     Default: oab-bpce-marketplace-frontend-bucket
-  ReadCapacityUnits:
-    Description: Provisioned read throughput
-    Type: Number
-    Default: '5'
-    MinValue: '5'
-    MaxValue: '10000'
-    ConstraintDescription: must be between 5 and 10000
-  WriteCapacityUnits:
-    Description: Provisioned write throughput
-    Type: Number
-    Default: '10'
-    MinValue: '5'
-    MaxValue: '10000'
-    ConstraintDescription: must be between 5 and 10000
 
 Resources:
   # S3 Bucket to store the static page of the web site.
@@ -61,60 +38,60 @@ Resources:
             Resource:
               - !Sub arn:aws:s3:::${FrontEndS3Bucket}/*
             Principal: "*"
-  VPC:
-    Type: 'AWS::EC2::VPC'
-    Properties:
-      EnableDnsSupport: 'true'
-      EnableDnsHostnames: 'true'
-      CidrBlock: 10.0.0.0/16
-
-  PublicSubnetA:
-    Type: 'AWS::EC2::Subnet'
-    Properties:
-      CidrBlock: 10.0.0.0/24
-      AvailabilityZone: !Sub ${AWS::Region}a
-      VpcId: !Ref VPC
-
-  PublicSubnetB:
-    Type: 'AWS::EC2::Subnet'
-    Properties:
-      CidrBlock: 10.0.1.0/24
-      AvailabilityZone: !Sub ${AWS::Region}b
-      VpcId: !Ref VPC
-
-  InternetGateway:
-    Type: 'AWS::EC2::InternetGateway'
-
-  VPCGatewayAttachment:
-    Type: 'AWS::EC2::VPCGatewayAttachment'
-    Properties:
-      VpcId: !Ref VPC
-      InternetGatewayId: !Ref InternetGateway
-
-  PublicRouteTable:
-    Type: 'AWS::EC2::RouteTable'
-    Properties:
-      VpcId: !Ref VPC
-
-  PublicRoute:
-    Type: 'AWS::EC2::Route'
-    DependsOn: VPCGatewayAttachment
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
-
-  PublicSubnetRouteTableAssociationA:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Properties:
-      SubnetId: !Ref PublicSubnetA
-      RouteTableId: !Ref PublicRouteTable
-
-  PublicSubnetRouteTableAssociationB:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Properties:
-      SubnetId: !Ref PublicSubnetB
-      RouteTableId: !Ref PublicRouteTable
+  # VPC:
+  #   Type: 'AWS::EC2::VPC'
+  #   Properties:
+  #     EnableDnsSupport: 'true'
+  #     EnableDnsHostnames: 'true'
+  #     CidrBlock: 10.0.0.0/16
+  #
+  # PublicSubnetA:
+  #   Type: 'AWS::EC2::Subnet'
+  #   Properties:
+  #     CidrBlock: 10.0.0.0/24
+  #     AvailabilityZone: !Sub ${AWS::Region}a
+  #     VpcId: !Ref VPC
+  #
+  # PublicSubnetB:
+  #   Type: 'AWS::EC2::Subnet'
+  #   Properties:
+  #     CidrBlock: 10.0.1.0/24
+  #     AvailabilityZone: !Sub ${AWS::Region}b
+  #     VpcId: !Ref VPC
+  #
+  # InternetGateway:
+  #   Type: 'AWS::EC2::InternetGateway'
+  #
+  # VPCGatewayAttachment:
+  #   Type: 'AWS::EC2::VPCGatewayAttachment'
+  #   Properties:
+  #     VpcId: !Ref VPC
+  #     InternetGatewayId: !Ref InternetGateway
+  #
+  # PublicRouteTable:
+  #   Type: 'AWS::EC2::RouteTable'
+  #   Properties:
+  #     VpcId: !Ref VPC
+  #
+  # PublicRoute:
+  #   Type: 'AWS::EC2::Route'
+  #   DependsOn: VPCGatewayAttachment
+  #   Properties:
+  #     RouteTableId: !Ref PublicRouteTable
+  #     DestinationCidrBlock: 0.0.0.0/0
+  #     GatewayId: !Ref InternetGateway
+  #
+  # PublicSubnetRouteTableAssociationA:
+  #   Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  #   Properties:
+  #     SubnetId: !Ref PublicSubnetA
+  #     RouteTableId: !Ref PublicRouteTable
+  #
+  # PublicSubnetRouteTableAssociationB:
+  #   Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  #   Properties:
+  #     SubnetId: !Ref PublicSubnetB
+  #     RouteTableId: !Ref PublicRouteTable
 
   # LoadBalancerSecurityGroup:
   #   Type: 'AWS::EC2::SecurityGroup'
@@ -145,154 +122,7 @@ Resources:
   #       TargetArns:
   #          - !Ref NetLoadBalancer
 
-################################################################################
-# Cognito User Pool Config                                                     #
-################################################################################
-  MyCognitoUserPool:
-    Type: AWS::Cognito::UserPool
-    Properties:
-      UserPoolName: !Sub ${AppName}UserPool
-      Schema:
-        - Name: email
-          AttributeDataType: String
-          Mutable: false
-          Required: true
-        - Name: phone_number
-          AttributeDataType: String
-          Mutable: false
-          Required: false
-      AliasAttributes:
-        - email
-      AutoVerifiedAttributes:
-        - email
-      AdminCreateUserConfig:
-        AllowAdminCreateUserOnly: false
-        UnusedAccountValidityDays: 5
-
-  MyCognitoUserPoolClient:
-    Type: AWS::Cognito::UserPoolClient
-    Properties:
-      ClientName: !Sub ${AppName}Client
-      ExplicitAuthFlows:
-        -  ADMIN_NO_SRP_AUTH
-      GenerateSecret: false
-      UserPoolId: !Ref 'MyCognitoUserPool'
-
-  MyCognitoIdentityPool:
-    Type: AWS::Cognito::IdentityPool
-    Properties:
-      IdentityPoolName: !Sub ${AppName}IdentityPool
-      AllowUnauthenticatedIdentities: false
-      CognitoIdentityProviders:
-        - ClientId: !Ref MyCognitoUserPoolClient
-          ProviderName: !GetAtt MyCognitoUserPool.ProviderName
-
-  MyCognitoAuthorizedRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Federated: "cognito-identity.amazonaws.com"
-            Action:
-              - "sts:AssumeRoleWithWebIdentity"
-            Condition:
-              StringEquals:
-                "cognito-identity.amazonaws.com:aud": !Ref MyCognitoIdentityPool
-              "ForAnyValue:StringLike":
-                "cognito-identity.amazonaws.com:amr": authenticated
-      Policies:
-        - PolicyName: "CognitoAuthorizedPolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action:
-                  - "mobileanalytics:PutEvents"
-                  - "cognito-sync:*"
-                  - "cognito-identity:*"
-                Resource: "*"
-
-              # - Effect: "Allow"
-              #   Action:
-              #     - "execute-api:Invoke"
-              #   Resource:
-              #     - !Sub arn:aws:executeapi:${AWS::Region}:*:c1jk9z77u9/*
-
-  MyCognitoUnAuthorizedRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Federated: "cognito-identity.amazonaws.com"
-            Action:
-              - "sts:AssumeRoleWithWebIdentity"
-            Condition:
-              StringEquals:
-                "cognito-identity.amazonaws.com:aud": !Ref MyCognitoIdentityPool
-              "ForAnyValue:StringLike":
-                "cognito-identity.amazonaws.com:amr": unauthenticated
-
-  # Assigns the roles to the Identity Pool
-  MyCognitoIdentityPoolRoleMapping:
-    Type: "AWS::Cognito::IdentityPoolRoleAttachment"
-    Properties:
-      IdentityPoolId: !Ref MyCognitoIdentityPool
-      Roles:
-        authenticated: !GetAtt MyCognitoAuthorizedRole.Arn
-        unauthenticated: !GetAtt MyCognitoUnAuthorizedRole.Arn
-
-  myDynamoDBTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: 'notes'
-      AttributeDefinitions:
-      - AttributeName: 'userId'
-        AttributeType: S
-      - AttributeName: 'noteId'
-        AttributeType: S
-      KeySchema:
-      - AttributeName: 'userId'
-        KeyType: HASH
-      - AttributeName: 'noteId'
-        KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref 'ReadCapacityUnits'
-        WriteCapacityUnits: !Ref 'WriteCapacityUnits'
-
 Outputs:
-  # MainAPIEndPoint:
-  #   Value: !Sub 'http://${NetLoadBalancer.DNSName}'
-  #   Description: Newly created application URL (won't work from the outside of your AWS VPC) -- TO BE CONFIRMED! --
   HomePageURL:
     Value: !GetAtt FrontEndS3Bucket.WebsiteURL
     Description: Main page of the web app.
-
-  CognitoUserPoolName:
-    Value: !Ref 'MyCognitoUserPool'
-    Description: logical ID of the Cognito User Pool
-
-  CognitoUserPoolArn:
-    Value: !GetAtt MyCognitoUserPool.Arn
-    Description: Arn of the Cognito User Pool
-
-  CognitoIdentityPoolId:
-    Value: !Ref MyCognitoIdentityPool
-    Description: Id of the Cognito Identity Pool
-
-  CognitoIdentityPoolClientId:
-    Value: !Ref MyCognitoUserPoolClient
-    Description: Id of the Cognito User Pool Client
-
-  CognitoUserPoolClientSecret:
-    Value: !GetAtt MyCognitoUserPoolClient.ClientSecret
-    Description: Secret of the Client App
-
-  DynamoDBTableArn:
-    Value: !GetAtt myDynamoDBTable.Arn
-    Description: Arn of the myDynamoDBTable.
