@@ -231,7 +231,7 @@ resources:
   Outputs:
     CognitoUserPoolName:
       Value:
-        Ref: 'MyCognitoUserPool'
+        Ref: MyCognitoUserPool
       Description: logical ID of the Cognito User Pool
 
     CognitoUserPoolArn:
