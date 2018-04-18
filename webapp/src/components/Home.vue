@@ -51,11 +51,8 @@ export default {
 
       getGreetings: function () {
         let apiName = 'my-api';
-        let path = '/hello';
+        let path = '/hello?hello=david';
         let myInit = { // OPTIONAL
-          queryStringParameters: {
-              hello: "david"
-          },
           headers: {}, // OPTIONAL
           response: false // OPTIONAL (return entire response object instead of response.data)
         }
