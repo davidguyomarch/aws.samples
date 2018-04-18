@@ -89,7 +89,7 @@ ServiceEndpoint=$(aws cloudformation describe-stacks \
 
 Region=$(aws configure get region --profile $PROFILE)
 
-(set -x; npx aws-api-gateway-cli-test \
+(set -x; apig-test \
       --username='david' \
       --password='Azerty1234!' \
       --user-pool-id="$UserPoolId" \
