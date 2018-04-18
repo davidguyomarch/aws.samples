@@ -16,8 +16,10 @@
     <h1 :style="theme.h1">
       Hicham Vue Sample
     </h1>
-    <button v-on:click="getGreetings">Test it</button>
-
+    <p> When you click on a button, I make a call to a Lambda function through API Gateway.
+    </p>
+    <button v-on:click="getGreetings">Test Simple Hello Call</button>
+    <button v-on:click="getCount">Test a request to dynamodb db.</button>
     <div :style="theme.section">
       <h2 :style="theme.h2">Sample Title</h2>
     </div>
@@ -26,7 +28,7 @@
 
 <script>
 import { AmplifyTheme } from '../amplify'
-import { API } from 'aws-amplify'
+import { Auth, API } from 'aws-amplify'
 
 
 export default {
@@ -49,13 +51,17 @@ export default {
 
       getGreetings: function () {
         let apiName = 'my-api';
-        let path = '/hello?hello=david';
+        let path = '/hello';
         let myInit = { // OPTIONAL
-            headers: {}, // OPTIONAL // hello=david
-            response: true // OPTIONAL (return entire response object instead of response.data)
+          queryStringParameters: {
+              hello: "david"
+          },
+          headers: {}, // OPTIONAL
+          response: false // OPTIONAL (return entire response object instead of response.data)
         }
+
         API.get(apiName, path, myInit).then(response => {
-            alert('The lambda function sent a response : ' + response.data.hello);
+            alert('Hello, ' + response.hello);
         });
       },
 
@@ -63,7 +69,7 @@ export default {
         let apiName = 'my-api';
         let path = '/notes/count';
         let myInit = { // OPTIONAL
-            headers: {}, // OPTIONAL // hello=david
+            headers: {}, // OPTIONAL
             response: true // OPTIONAL (return entire response object instead of response.data)
         }
         API.get(apiName, path, myInit).then(response => {
