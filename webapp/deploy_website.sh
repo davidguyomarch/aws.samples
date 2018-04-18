@@ -127,7 +127,7 @@ const aws_exports = {
 export default aws_exports
 
 EOF
-
+# cat ./src/aws-exports.js
 npm run build
 aws s3 sync ./dist/ s3://$BUCKET_NAME --profile $PROFILE
 
