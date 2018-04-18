@@ -4,7 +4,7 @@ const dynamoDbLib = require("./libs/dynamodb-lib.js");
 const Notes = require("./libs/Notes.js");
 
 exports.hello = function(event, context, callback) {
-//  console.log('Received event:', JSON.stringify(event, null, 2));
+  console.log('Received event:', JSON.stringify(event, null, 2));
   //event.queryStringParameters.name;
   if ((event.queryStringParameters === undefined)||(event.queryStringParameters.hello === undefined)) {
     callback(null, resp.failure({"error": "invalid input"}));
@@ -71,7 +71,7 @@ exports.create = async function (event, context, callback) {
 }
 
 exports.count = async function (event, context, callback) {
-  console.log(" - Notes.count (" + JSON.stringify(event) + ")");
+//  console.log(" - Notes.count (" + JSON.stringify(event) + ")");
   if ((event.requestContext === undefined)||(event.requestContext.identity === undefined)||(event.requestContext.identity.cognitoIdentityId === undefined)) {
     callback(null, resp.failure({"error": "invalid input"}));
     return;

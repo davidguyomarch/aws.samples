@@ -33,10 +33,9 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       # Resource: "arn:aws:dynamodb:${self:provider.region}:*:*"
-      # Resource:
-        # 'Fn::GetAtt': [myDynamoDBTable, Arn]
       Resource:
-        - "arn:aws:apigateway:*::"
+        'Fn::GetAtt': [myDynamoDBTable, Arn]
+
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
   # - path: url path is /notes
@@ -179,6 +178,11 @@ resources:
                       - - "arn:aws:execute-api:${self:provider.region}:"
                         - Ref: "AWS::AccountId"
                         - ":uwb7mddira/${self:provider.stage}/GET/hello"
+                    - Fn::Join:
+                      - ""
+                      - - "arn:aws:execute-api:${self:provider.region}:"
+                        - Ref: "AWS::AccountId"
+                        - ":uwb7mddira/${self:provider.stage}/GET/notes/count"
 
     MyCognitoUnAuthorizedRole:
       Type: "AWS::IAM::Role"
