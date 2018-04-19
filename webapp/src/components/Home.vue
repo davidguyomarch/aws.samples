@@ -70,7 +70,7 @@ export default {
             response: true // OPTIONAL (return entire response object instead of response.data)
         }
         API.get(apiName, path, myInit).then(response => {
-            alert('You have ' + response.data.count + 'notes.');
+            alert('You have ' + response.data.count + ' notes.');
         });
       }
     }

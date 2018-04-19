@@ -118,7 +118,8 @@ const aws_exports = {
       endpoints: [
           {
               name: "my-api",
-              endpoint: "$ServiceEndpoint"
+              endpoint: '$ServiceEndpoint',
+              region: '$Region'
           }
       ]
   }
