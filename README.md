@@ -1,5 +1,14 @@
 # WebSite using Vue-js, a serverless backend and cognito auth.
 
+## Purpose
+This application has no purpose for now. It is just a demo app to show the articulation of a devops developed software with
+- One Page App using Vue.js
+- Authentication through a Cognito Pool and Federated Identity.
+- APi Gateway to detail the REST API
+- Lambda function for the service
+- Dynamodb for the database
+- The automated deployment of resources is based on serverless.com
+
 ## Installation
 
 The application is divided in 2 different parameters
