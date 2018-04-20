@@ -10,7 +10,7 @@ This project is a demo app to showcase the capabilities of AWS for serverless ap
   - Users are stored in a [Cognito User Pool](https://aws.amazon.com/cognito/)
   - Backend resources (API Gateway resources) are protected by [Cognito Federated Identity](https://aws.amazon.com/cognito/)
 
-- a Front end app is a One Page App developed in [Vue.js](https://vuejs.org/).
+- a Front end app developed as a One Page App with [Vue.js](https://vuejs.org/).
   -	The app is accessible for authenticated users.
   - We use [AWS Amplify](https://aws.github.io/aws-amplify/) to access AWS resources. The Amplify library greatly simplifies the use of AWS Serverless resources: Authentication through Cognito and APi Gateway secured access.
 
