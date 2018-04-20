@@ -14,6 +14,9 @@
 <template>
   <div :style="theme.form">
     <h1 :style="theme.header">Sign Up</h1>
+    <div :style="theme.error">
+      {{ errorMessage }}
+    </div>
     <div :style="theme.inputRow">
       <input :style="theme.input" v-model="username" placeholder="Username" autofocus />
     </div>
@@ -55,6 +58,7 @@ export default {
       password: '',
       email: '',
       phone_number: '',
+      errorMessage: '',
       theme: AmplifyTheme
     }
   },
@@ -68,8 +72,7 @@ export default {
                 logger.debug('sign up success', data);
                 this.$router.push('/auth/confirmSignUp');
             })
-            .catch(err => logger.error('sign up error', err))
-
+            .catch(err => (this.errorMessage = err.message))
     },
     signIn: function() {
         this.$router.push('/auth/signIn');
