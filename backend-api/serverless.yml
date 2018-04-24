@@ -18,8 +18,8 @@ provider:
   name: aws
   runtime: nodejs8.10
   stage: prod
-  region:
-    Ref: 'AWS::Region'
+  region: ${opt:region, 'eu-central-1'}
+#    TODO: would be nice to use something like Ref: 'AWS::Region' to get region from .aws/config
   # 'iamRoleStatement' defines the permission policy for the Lambda function.
   # In this case Lambda functions are granted with permissions to access DynamoDB.
   iamRoleStatements:

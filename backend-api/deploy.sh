@@ -16,6 +16,7 @@
 
 
 PROFILE="default"
+REGION="eu-central-1"
 # BUCKET_NAME="vo-oab-bpce-marketplace-frontend-bucket"
 # STACK_NAME="ServerlessDemo"
 
@@ -30,6 +31,9 @@ USAGE: usage [OPTIONS] [TEXT]
 
    -p | --profile        Define the aws profile of your .aws/config file you want to use.
                          default: default
+
+   -r | --region        AWS Region.
+                         default: eu-central-1
 
 EOF
   return
@@ -51,6 +55,11 @@ case $key in
       shift # past argument
       shift # past value
       ;;
+    -r | --region)
+      REGION="$2"
+      shift # past argument
+      shift # past value
+      ;;
     *)    # unknown option
       POSITIONAL+=("$1") # save it in an array for later
       shift # past argument
@@ -68,4 +77,4 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 #     --output text \
 #     --profile $PROFILE)
 
-serverless deploy
+serverless deploy --region $REGION
