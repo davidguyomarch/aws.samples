@@ -1,4 +1,4 @@
-service: hello-app-api
+service: HelloApi
 
 # Inputs
 #   AppName
@@ -18,8 +18,8 @@ provider:
   name: aws
   runtime: nodejs8.10
   stage: prod
-  region: eu-central-1
-
+  region:
+    - Ref: 'AWS::Region'
   # 'iamRoleStatement' defines the permission policy for the Lambda function.
   # In this case Lambda functions are granted with permissions to access DynamoDB.
   iamRoleStatements:
@@ -90,6 +90,7 @@ functions:
           method: get
           cors: true
           authorizer: aws_iam
+
 resources:
   Resources:
 
