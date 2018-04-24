@@ -19,7 +19,7 @@ provider:
   runtime: nodejs8.10
   stage: prod
   region:
-    - Ref: 'AWS::Region'
+    Ref: 'AWS::Region'
   # 'iamRoleStatement' defines the permission policy for the Lambda function.
   # In this case Lambda functions are granted with permissions to access DynamoDB.
   iamRoleStatements:
@@ -93,6 +93,45 @@ functions:
 
 resources:
   Resources:
+    # IAM role to enable logging for API Gateway.
+    CloudWatchRole:
+     Type: "AWS::IAM::Role"
+     Properties:
+      AssumeRolePolicyDocument:
+       Version: "2012-10-17"
+       Statement:
+        - Effect: Allow
+          Principal:
+           Service:
+            - "apigateway.amazonaws.com"
+          Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+       - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+
+    Account:
+      Type: "AWS::ApiGateway::Account"
+      Properties:
+        CloudWatchRoleArn:
+          "Fn::GetAtt":
+            - CloudWatchRole
+            - Arn
+
+    ApiGatewayStage:
+      Type: AWS::ApiGateway::Stage
+      Properties:
+        # StageName: Prod
+        # Description: Prod Stage
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        DeploymentId:
+          Ref: TestDeployment
+        MethodSettings:
+          - DataTraceEnabled: true
+            HttpMethod: "*"
+            LoggingLevel: INFO
+            ResourcePath: "/*"
+            MetricsEnabled: true
 
   ################################################################################
   # Cognito User Pool Config                                                     #
