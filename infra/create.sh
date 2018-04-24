@@ -2,7 +2,7 @@
 
 
 PROFILE="default"
-BUCKET_NAME="vo-oab-bpce-marketplace-frontend-bucket"
+BUCKET_NAME="oab-bpce-marketplace-frontend-bucket"
 STACK_NAME="hello-client-prod"
 
 usage()
