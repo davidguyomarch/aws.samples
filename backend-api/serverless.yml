@@ -116,22 +116,22 @@ resources:
           "Fn::GetAtt":
             - CloudWatchRole
             - Arn
-
-    ApiGatewayStage:
-      Type: AWS::ApiGateway::Stage
-      Properties:
-        # StageName: Prod
-        # Description: Prod Stage
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        DeploymentId:
-          Ref: TestDeployment
-        MethodSettings:
-          - DataTraceEnabled: true
-            HttpMethod: "*"
-            LoggingLevel: INFO
-            ResourcePath: "/*"
-            MetricsEnabled: true
+    # 
+    # ApiGatewayStage:
+    #   Type: AWS::ApiGateway::Stage
+    #   Properties:
+    #     # StageName: Prod
+    #     # Description: Prod Stage
+    #     RestApiId:
+    #       Ref: ApiGatewayRestApi
+    #     DeploymentId:
+    #       Ref: TestDeployment
+    #     MethodSettings:
+    #       - DataTraceEnabled: true
+    #         HttpMethod: "*"
+    #         LoggingLevel: INFO
+    #         ResourcePath: "/*"
+    #         MetricsEnabled: true
 
   ################################################################################
   # Cognito User Pool Config                                                     #
