@@ -3,7 +3,7 @@
 PROFILE="default"
 BUCKET_NAME="vo-oab-bpce-marketplace-frontend-bucket"
 # INFRA_STACK_NAME="hello-client-prod"
-SERVERLESS_STACK_NAME="hello-app-api-prod"
+SERVERLESS_STACK_NAME="HelloApi-prod"
 
 usage()
 {
@@ -21,7 +21,7 @@ USAGE: usage [OPTIONS] [TEXT]
                          default: oab-bpce-marketplace-frontend-bucket
 
    -n | --stackname      Define the name of the serverless stack
-                         default: hello-app-api-prod
+                         default: HelloApi-prod
 EOF
   return
 }
@@ -129,6 +129,7 @@ export default aws_exports
 
 EOF
 # cat ./src/aws-exports.js
+# npm install
 npm run build
 aws s3 sync ./dist/ s3://$BUCKET_NAME --profile $PROFILE
 
