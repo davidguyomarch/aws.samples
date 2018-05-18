@@ -21,7 +21,7 @@ USAGE: usage [OPTIONS] [TEXT]
                          default: oab-bpce-marketplace-frontend-bucket
 
    -n | --stackname      Define the name of the stack
-                         default: ServerlessDemo
+                         default: hello-client-prod
 EOF
   return
 }
