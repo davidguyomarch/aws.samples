@@ -116,7 +116,7 @@ resources:
           "Fn::GetAtt":
             - CloudWatchRole
             - Arn
-    # 
+    #
     # ApiGatewayStage:
     #   Type: AWS::ApiGateway::Stage
     #   Properties:
@@ -217,12 +217,16 @@ resources:
                       - ""
                       - - "arn:aws:execute-api:${self:provider.region}:"
                         - Ref: "AWS::AccountId"
-                        - ":uwb7mddira/${self:provider.stage}/GET/hello"
+                        - ":"
+                        - Ref: "ApiGatewayRestApi"
+                        - "/${self:provider.stage}/GET/hello"
                     - Fn::Join:
                       - ""
                       - - "arn:aws:execute-api:${self:provider.region}:"
                         - Ref: "AWS::AccountId"
-                        - ":uwb7mddira/${self:provider.stage}/GET/notes/count"
+                        - ":"
+                        - Ref: "ApiGatewayRestApi"
+                        - "/${self:provider.stage}/GET/notes/count"
 
     MyCognitoUnAuthorizedRole:
       Type: "AWS::IAM::Role"
